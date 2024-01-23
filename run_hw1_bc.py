@@ -6,7 +6,7 @@ from omegaconf import DictConfig, OmegaConf
 @hydra.main(config_path="conf", config_name="config_hw1")
 def my_main(cfg: DictConfig):
     results = my_app(cfg)
-    # print ("Results:", results)
+    print ("Results:", results)
     return results
 
 

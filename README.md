@@ -1,5 +1,12 @@
 [![tests](https://github.com/milarobotlearningcourse/robot_learning/actions/workflows/testing.yaml/badge.svg)](https://github.com/milarobotlearningcourse/robot_learning/actions/workflows/testing.yaml)
 
+salloc -c 4 --gres=gpu:1 --mem=15G
+jupyter notebook --no-browser --ip=* --port=8081
+
+ssh -L 8081:cn-a011:8081 -fN mila
+
+python main.py
+
 # Setup
 
 You can run this code on your own machine or on Google Colab (Colab is not completely supported). 
