@@ -34,11 +34,25 @@ def build_mlp(
     returns:
         MLP (nn.Module)
     """
+    # print('kwargs', kwargs)
     if isinstance(kwargs["params"]["output_activation"], str):
         output_activation = _str_to_activation[kwargs["params"]["output_activation"]]
     # TODO: return a MLP. This should be an instance of nn.Module
     # Note: nn.Sequential is an instance of nn.Module.
-    raise NotImplementedError
+
+    layers = []
+    assert len(kwargs["params"]["layer_sizes"]) is not [], "layer_sizes must be a list of integers"
+    assert len(kwargs["params"]["activations"]) == len(kwargs["params"]["layer_sizes"]), "activation list must hav the same size as layer_sizes list"
+    activations = kwargs["params"]["activations"]
+
+    layers.extend([nn.Linear(input_size, kwargs["params"]["layer_sizes"][0]), _str_to_activation[activations[0]]])
+    for in_dim, out_dim, act in zip(kwargs["params"]["layer_sizes"][:-1], kwargs["params"]["layer_sizes"][1:], activations[1:]):
+        layers.extend([nn.Linear(in_dim, out_dim), _str_to_activation[act]])
+    layers.extend([nn.Linear(out_dim, output_size), output_activation])
+
+    mlp = nn.Sequential(*layers)
+    print('mlp', mlp)
+    return mlp
 
 device = None
 

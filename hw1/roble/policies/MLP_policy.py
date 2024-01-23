@@ -76,9 +76,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
     # query the policy with observation(s) to get selected action(s)
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # TODO: 
-        ## Provide the logic to produce an action from the policy
-        pass
+        # TODO:
+        # # Provide the logic to produce an action from the policy
+        action = self(obs)
+        return action
+
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -97,11 +99,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         else:
             if self._deterministic:
                 ##  TODO output for a deterministic policy
-                action_distribution = TODO
+                action_distribution = self._mean_net(observation)
             else:
                 
                 ##  TODO output for a stochastic policy
-                action_distribution = TODO
+                mean = self._mean_net(observation)
+                std = self._logstd(observation).exp()
+                dist = distributions.Normal(mean, std)
+                action_distribution = dist.rsample()
         return action_distribution
     ##################################
 
@@ -131,7 +136,8 @@ class MLPPolicySL(MLPPolicy):
         ):
         
         # TODO: update the policy and return the loss
-        loss = TODO
+        pred_actions = self.get_action(observations)
+        loss = self._loss(pred_actions, actions)
         return {
             'Training Loss': ptu.to_numpy(loss),
         }
@@ -140,10 +146,11 @@ class MLPPolicySL(MLPPolicy):
         self, observations, actions, next_observations,
         adv_n=None, acs_labels_na=None, qvals=None
         ):
-        
-        
+
         # TODO: Create the full input to the IDM model (hint: it's not the same as the actor as it takes both obs and next_obs)
-        loss = TODO
+        full_input = torch.cat((observations, next_observations), dim=1)
+        pred_actions = self.get_action(full_input)
+        loss = self._loss(pred_actions, actions)
         return {
             'Training Loss IDM': ptu.to_numpy(loss),
         }
