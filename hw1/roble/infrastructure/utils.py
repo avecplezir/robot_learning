@@ -24,7 +24,7 @@ def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('
                 time.sleep(env.model.opt.timestep)
         # use the most recent ob to decide what to do
         obs.append(ob)
-        ac = policy(ob) # HINT: query the policy's get_action function
+        ac = policy.get_action(ob) # HINT: query the policy's get_action function
         ac = ac[0]
         acs.append(ac)
         ob, rew, done, _ = env.step(ac)
@@ -71,7 +71,10 @@ def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False, ren
         Hint1: use sample_trajectory to get each path (i.e. rollout) that goes into paths
     """
     paths = []
-    TODO
+    for _ in range(ntraj):
+        path = sample_trajectory(env, policy, max_path_length, render, render_mode)
+        paths.append(path)
+
     return paths
 
 ############################################

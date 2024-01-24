@@ -7,6 +7,8 @@ import numpy as np
 import pickle
 from hw1.roble.infrastructure import pytorch_util as ptu
 
+from copy import deepcopy
+
 class BCAgent(BaseAgent):
     import hw1.roble.util.class_util as classu
     @classu.hidden_member_initialize
@@ -22,7 +24,7 @@ class BCAgent(BaseAgent):
 
         )
 
-        self.idm_params = self._agent_params
+        self.idm_params = deepcopy(self._agent_params)
         
         # TODO: Adjust the input dimension of the IDM (hint: it's not the same as the actor as it takes both obs and next_obs)
         self.idm_params['ob_dim'] *= 2
@@ -35,6 +37,15 @@ class BCAgent(BaseAgent):
 
         # replay buffer
         self.reset_replay_buffer()
+
+    def reset_actor(self):
+        print('reseting self._agent_params', self._agent_params)
+        self._actor = MLPPolicySL(
+            **self._agent_params,
+            deterministic=False,
+            nn_baseline=False,
+
+        )
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
         # training a BC agent refers to updating its actor using
@@ -69,19 +80,26 @@ class BCAgent(BaseAgent):
             
             with torch.no_grad():
                 # TODO: create the input to the IDM with observations and next_observations
-                full_input = np.concatenate((observations, next_observations), axis=1)
+                # full_input = np.concatenate((observations, next_observations), axis=1)
+                full_input = torch.cat((observations, next_observations), dim=1).to(ptu.device)
                 # TODO: query the IDM for the action (use one of the policy methods)
-                action = self._idm.get_action(full_input)
+                # full_input = torch.FloatTensor(full_input).to(ptu.device)
+                # print('full_input', full_input.shape)
+                action = self._idm(full_input)
 
+            # print(' observations.squeeze().numpy()',  observations.squeeze().numpy().shape)
+            # print('action.squeeze()', action.squeeze().shape)
+            # print('action', action.shape)
             ep_labelled_data["observation"] = observations.squeeze().numpy()
             ep_labelled_data["next_observation"] = next_observations.squeeze().numpy()
-            ep_labelled_data["action"] = action.squeeze()
+            ep_labelled_data["action"] = ptu.to_numpy(action.squeeze())
 
             all_labelled_data.append(ep_labelled_data)
             print("Index: ", episode_idx, "was labelled")
 
         # Don't change: save labelled data
         save_path = self.env_params["expert_data"].replace("expert_data_", "labelled_data_")
+        print('save_path idm', save_path)
         with open(save_path, "wb") as f:
             pickle.dump(all_labelled_data, f)
             print("Saved labelled data to labelled_data.pkl")

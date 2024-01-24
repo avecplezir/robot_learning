@@ -78,7 +78,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         # TODO:
         # # Provide the logic to produce an action from the policy
-        action = self(obs)
+        obs = torch.FloatTensor(obs).unsqueeze(0).to(ptu.device)
+        # action = self(obs).rsample()
+        action = self(obs).mean #.rsample()
+        # action = self(obs).rsample()
+        action = ptu.to_numpy(action)
         return action
 
 
@@ -104,9 +108,10 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
                 
                 ##  TODO output for a stochastic policy
                 mean = self._mean_net(observation)
-                std = self._logstd(observation).exp()
+                std = torch.exp(self._logstd)
                 dist = distributions.Normal(mean, std)
-                action_distribution = dist.rsample()
+                action_distribution = dist #.rsample()
+                # action_distribution = self._mean_net(observation)
         return action_distribution
     ##################################
 
@@ -136,8 +141,20 @@ class MLPPolicySL(MLPPolicy):
         ):
         
         # TODO: update the policy and return the loss
-        pred_actions = self.get_action(observations)
-        loss = self._loss(pred_actions, actions)
+        observations = torch.FloatTensor(observations).to(ptu.device)
+        actions = torch.FloatTensor(actions).to(ptu.device)
+        dist = self(observations)
+        # print('observations', observations.shape)
+        # print('actions', actions.shape)
+
+        # pred_actions = dist.rsample()
+        # loss = self._loss(pred_actions, actions)
+        loss = -dist.log_prob(actions).mean() #(pred_actions - actions/).pow(2).mean()
+
+        self._optimizer.zero_grad()
+        loss.backward()
+        self._optimizer.step()
+
         return {
             'Training Loss': ptu.to_numpy(loss),
         }
@@ -147,10 +164,19 @@ class MLPPolicySL(MLPPolicy):
         adv_n=None, acs_labels_na=None, qvals=None
         ):
 
+        observations = torch.FloatTensor(observations).to(ptu.device)
+        actions = torch.FloatTensor(actions).to(ptu.device)
+        next_observations = torch.FloatTensor(next_observations).to(ptu.device)
+
         # TODO: Create the full input to the IDM model (hint: it's not the same as the actor as it takes both obs and next_obs)
         full_input = torch.cat((observations, next_observations), dim=1)
-        pred_actions = self.get_action(full_input)
+        pred_actions = self(full_input)
         loss = self._loss(pred_actions, actions)
+
+        self._optimizer.zero_grad()
+        loss.backward()
+        self._optimizer.step()
+
         return {
             'Training Loss IDM': ptu.to_numpy(loss),
         }

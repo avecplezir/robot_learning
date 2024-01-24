@@ -132,6 +132,8 @@ class RL_Trainer(object):
             self._total_envsteps += envsteps_this_batch
 
             # relabel the collected obs with actions from a provided expert policy
+            print('relabel_with_expert', relabel_with_expert)
+            print('start_relabel_with_expert', start_relabel_with_expert)
             if relabel_with_expert and itr>=start_relabel_with_expert:
                 paths = self.do_relabel_with_expert(expert_policy, paths)  # HW1: implement this function below
 
@@ -143,13 +145,16 @@ class RL_Trainer(object):
 
                 # TODO: create a figure from the loss curve in idm_training_logs and add it to your report
                 figure = None
-                
+
+                print('finish idm training')
+
                 # Don't change
                 self._agent.reset_replay_buffer()
                 self._params['env']['expert_data'] = self._params['env']['expert_unlabelled_data']
+                print('1 initial_expertdata', initial_expertdata)
                 unlabelled_data = self.collect_training_trajectories(
                     itr,
-                    initial_expertdata,
+                    initial_expertdata, #initial_expertdata,self._params['env']['expert_data']
                     collect_policy,
                     self._params['alg']['batch_size']
                 )
@@ -159,17 +164,21 @@ class RL_Trainer(object):
                 path_list.pop(-2)
                 path_list[-1] = path_list[-1].replace("unlabelled", "labelled")
                 self._params['env']['expert_data'] = "/".join(path_list)
+                print('2 initial_expertdata', initial_expertdata)
                 labelled_data = self.collect_training_trajectories(
                     itr,
-                    initial_expertdata,
+                    initial_expertdata, #self._params['env']['expert_data'], #
                     collect_policy,
                     self._params['alg']['batch_size']
                 )
                 paths, envsteps_this_batch, train_video_paths = labelled_data
+                print('3 paths', paths[0]['observation'].shape, len(paths))
                 self._agent.reset_replay_buffer()
                 self._agent.add_to_replay_buffer(paths)
 
             # train agent (using sampled data from replay buffer)
+            # self._agent.reset_actor()
+            # self._agent._actor.train()
             training_logs = self.train_agent()  # HW1: implement this function below
 
             # log/save
@@ -214,6 +223,7 @@ class RL_Trainer(object):
         print('itr', itr)
         if itr == 0:
             print("\nLoading expert data...")
+            print('load_initial_expertdata', load_initial_expertdata)
             with open(load_initial_expertdata, 'rb') as f:
                 loaded_paths = pickle.load(f)
             return loaded_paths, 0, None
@@ -243,6 +253,7 @@ class RL_Trainer(object):
             # HINT1: use the agent's sample function
             # HINT2: how much data = self._params['train_batch_size']
             ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = self._agent.sample(self._params['alg']['train_batch_size'])
+            # print('ob_batch', ob_batch.shape)
 
             # TODO use the sampled data to train an agent
             # HINT: use the agent's train function
@@ -258,12 +269,12 @@ class RL_Trainer(object):
             # TODO sample some data from the data buffer
             # HINT1: use the agent's sample function
             # HINT2: how much data = self._params['train_batch_size']
-            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = TODO
+            ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch = self._agent.sample(self._params['alg']['train_batch_size'])
 
             # TODO use the sampled data to train an agent
             # HINT: use the agent's train_idm function
             # HINT: keep the agent's training log for debugging
-            train_log = TODO
+            train_log = self._agent.train_idm(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
             all_logs.append(train_log)
         return all_logs
 
@@ -309,6 +320,9 @@ class RL_Trainer(object):
             # decide what to log
             logs = OrderedDict()
 
+            print('train_returns', len(train_returns))
+            print('eval_returns', len(eval_returns))
+
             logs["train_ep_lens"] = train_ep_lens
             logs["eval_ep_lens"] = eval_ep_lens
             logs["train_returns"] = train_returns
@@ -316,6 +330,7 @@ class RL_Trainer(object):
             logs["Train_EnvstepsSoFar"] = self._total_envsteps
             logs["TimeSinceStart"] = time.time() - self._start_time
             last_log = training_logs[-1]  # Only use the last log for now
+            # print('training_logs', training_logs)
             logs.update(last_log)
             logs["reward"] = [path["reward"] for path in paths]
             logs["eval_reward"] = [path["reward"] for path in eval_paths]
