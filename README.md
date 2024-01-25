@@ -1,11 +1,5 @@
 [![tests](https://github.com/milarobotlearningcourse/robot_learning/actions/workflows/testing.yaml/badge.svg)](https://github.com/milarobotlearningcourse/robot_learning/actions/workflows/testing.yaml)
 
-salloc -c 4 --gres=gpu:1 --mem=15G
-jupyter notebook --no-browser --ip=* --port=8081
-
-ssh -L 8081:cn-a011:8081 -fN mila
-
-python main.py
 
 # Setup
 
@@ -46,7 +40,7 @@ python run_hw1_bc.py logging.random_seed=3
 
 Base BC Humanoid agents:
 ```
-python run_hw1_bc.py logging.random_seed=1 env.env_name='Humanoid-v2 env.expert_policy_file=../../../hw1/roble/policies/experts/Humanoid.pkl' env.expert_data='../../../hw1/roble/expert_data/expert_data_Humanoid-v2.pkl'
+python run_hw1_bc.py logging.random_seed=1 env.env_name=Humanoid-v2 env.expert_policy_file='../../../hw1/roble/policies/experts/Humanoid.pkl' env.expert_data='../../../hw1/roble/expert_data/expert_data_Humanoid-v2.pkl'
 ```
 
 Varying batch size for BC Ant agents:
@@ -65,11 +59,25 @@ python run_hw1_bc.py alg.n_iter=1 alg.do_dagger=false alg.train_idm=true logging
 BC and IDM for HalfCheetah agents:
 
 ```
-python run_hw1_bc.py logging.random_seed=1
-python run_hw1_bc.py alg.n_iter=1 alg.do_dagger=false alg.train_idm=true logging.random_seed=1
-
+python run_hw1_bc.py logging.random_seed=1 env.env_name=HalfCheetah-v2 env.expert_policy_file='../../../hw1/roble/policies/experts/HalfCheetah.pkl' env.expert_data='../../../hw1/roble/expert_data/expert_data_HalfCheetah-v2.pkl'
+python run_hw1_bc.py alg.n_iter=1 alg.do_dagger=false alg.train_idm=true logging.random_seed=1 env.env_name=HalfCheetah-v2 env.expert_policy_file='../../../hw1/roble/policies/experts/HalfCheetah.pkl' env.expert_data='../../../hw1/roble/expert_data/expert_data_HalfCheetah-v2.pkl' env.expert_unlabelled_data=../../../hw1/roble/expert_data/unlabelled/unlabelled_data_HalfCheetah-v2.pkl
 ```
 
+Dagger Ant
+
+```
+python run_hw1_bc.py alg.n_iter=5 alg.do_dagger=true alg.train_idm=false logging.random_seed=2
+```
+
+Dagger Humanoid
+
+```
+python run_hw1_bc.py alg.n_iter=20 alg.do_dagger=true alg.train_idm=false logging.random_seed=1 alg.batch_size=1000 env.env_name=Humanoid-v2 env.expert_policy_file='../../../hw1/roble/policies/experts/Humanoid.pkl' env.expert_data='../../../hw1/roble/expert_data/expert_data_Humanoid-v2.pkl'
+```
+
+salloc -c 4 --gres=gpu:1 --mem=15G
+jupyter notebook --no-browser --ip=* --port=8081
+ssh -L 8081:cn-a011:8081 -fN mila
 
 
 Assignments for [UdeM roble: Robot Learning Course](https://fracturedplane.com/teaching-new-course-in-robot-learning.html). Based on [Berkeley CS 285: Deep Reinforcement Learning, Decision Making, and Control](http://rail.eecs.berkeley.edu/deeprlcourse/).

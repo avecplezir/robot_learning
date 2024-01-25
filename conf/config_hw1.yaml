@@ -2,7 +2,7 @@ env:
 #  expert_policy_file: ../../../hw1/roble/policies/experts/HalfCheetah.pkl # Relative to where you're running this script from
 #  expert_data: ../../../hw1/roble/expert_data/expert_data_HalfCheetah-v2.pkl  # Relative to where you're running this script from
 #  expert_unlabelled_data: ../../../hw1/roble/expert_data/unlabelled/unlabelled_data_HalfCheetah-v2.pkl  # Relative to where you're running this script from
-#  expert_policy_file: ../../../hw1/roble/policies/experts/Ant.pkl # Relative to where you're running this script from
+  expert_policy_file: ../../../hw1/roble/policies/experts/Ant.pkl # Relative to where you're running this script from
   expert_data: ../../../hw1/roble/expert_data/expert_data_Ant-v2.pkl  # Relative to where you're running this script from
   expert_unlabelled_data: ../../../hw1/roble/expert_data/unlabelled/unlabelled_data_Ant-v2.pkl  # Relative to where you're running this script from
   env_name: Ant-v2
