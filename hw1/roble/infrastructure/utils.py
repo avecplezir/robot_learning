@@ -6,7 +6,7 @@ import time
 
 def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('rgb_array')):
     # initialize env for the beginning of a new rollout
-    ob = env.reset() # HINT: should be the output of resetting the env
+    ob = env.reset() # HINT: should be the outputs of resetting the env
     obs, acs, rewards, next_obs, terminals, image_obs = [], [], [], [], [], []
     steps = 0
     while True:

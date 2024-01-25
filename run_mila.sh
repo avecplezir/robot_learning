@@ -2,7 +2,7 @@
 #SBATCH --time=2:00:00
 #SBATCH --mem=8G
 #SBATCH --gpus-per-node=1
-#SBATCH --output=out/%x_%A.out
+#SBATCH --outputs=out/%x_%A.out
 #SBATCH --error=out/%x_%A.err
 #SBATCH --cpus-per-task=4
 #SBATCH --mail-user=None

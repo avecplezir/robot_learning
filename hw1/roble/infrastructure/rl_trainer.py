@@ -6,6 +6,8 @@ from IPython import embed
 import gym
 import torch, pickle
 from omegaconf import DictConfig, OmegaConf
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from hw1.roble.infrastructure import pytorch_util as ptu
 from hw1.roble.infrastructure.logging import Logger as TableLogger
@@ -142,9 +144,17 @@ class RL_Trainer(object):
 
             if self._params['alg']['train_idm']:
                 idm_training_logs = self.train_idm()
-
+                imd_trainning_loss = [d['Training Loss IDM'] for d in idm_training_logs]
                 # TODO: create a figure from the loss curve in idm_training_logs and add it to your report
-                figure = None
+                fig = plt.figure()
+                # sns.tsplot(data=idm_training_logs)
+                plt.plot(imd_trainning_loss)
+                plt.xlabel('Training Iteration')
+                plt.ylabel('Training IDM Loss')
+                figure = fig
+
+                print('saving idm plot to', self._params['logging']['logdir'] + '/idm_training_loss.png')
+                figure.savefig(self._params['logging']['logdir'] + '/idm_training_loss.png')
 
                 print('finish idm training')
 
@@ -154,7 +164,7 @@ class RL_Trainer(object):
                 print('1 initial_expertdata', initial_expertdata)
                 unlabelled_data = self.collect_training_trajectories(
                     itr,
-                    initial_expertdata, #initial_expertdata,self._params['env']['expert_data']
+                    self._params['env']['expert_data'], #initial_expertdata, #initial_expertdata,self._params['env']['expert_data']
                     collect_policy,
                     self._params['alg']['batch_size']
                 )
@@ -167,7 +177,7 @@ class RL_Trainer(object):
                 print('2 initial_expertdata', initial_expertdata)
                 labelled_data = self.collect_training_trajectories(
                     itr,
-                    initial_expertdata, #self._params['env']['expert_data'], #
+                    self._params['env']['expert_data'], #initial_expertdata, #self._params['env']['expert_data'], #
                     collect_policy,
                     self._params['alg']['batch_size']
                 )
@@ -178,6 +188,8 @@ class RL_Trainer(object):
 
             # train agent (using sampled data from replay buffer)
             # self._agent.reset_actor()
+            # self._agent.reset_replay_buffer()
+            # self._agent.add_to_replay_buffer(paths)
             # self._agent._actor.train()
             training_logs = self.train_agent()  # HW1: implement this function below
 
@@ -232,7 +244,6 @@ class RL_Trainer(object):
         # HINT1: use sample_trajectories from utils
         # HINT2: you want each of these collected rollouts to be of length self.params['ep_len']
         print("\nCollecting data to be used for training...")
-        print("self.params['ep_len']", self.params['ep_len'])
         paths, envsteps_this_batch = utils.sample_trajectories(self._env, collect_policy, batch_size, self._params['env']['max_episode_length'])
 
         # collect more rollouts with the same policy, to be saved as videos in tensorboard
@@ -284,6 +295,11 @@ class RL_Trainer(object):
         # TODO relabel collected obsevations (from our policy) with labels from an expert policy
         # HINT: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
+        for path in paths:
+            # print("path['observation'", path['observation'].shape)
+            # print("path['action']", path['action'].shape)
+            # print("expert_policy.get_action(path['observation'])", expert_policy.get_action(path['observation']).shape)
+            path['action'] = expert_policy.get_action(path['observation'])
         return paths
 
     ####################################

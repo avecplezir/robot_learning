@@ -102,11 +102,11 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             return action_distribution
         else:
             if self._deterministic:
-                ##  TODO output for a deterministic policy
+                ##  TODO outputs for a deterministic policy
                 action_distribution = self._mean_net(observation)
             else:
                 
-                ##  TODO output for a stochastic policy
+                ##  TODO outputs for a stochastic policy
                 mean = self._mean_net(observation)
                 std = torch.exp(self._logstd)
                 dist = distributions.Normal(mean, std)
@@ -147,9 +147,9 @@ class MLPPolicySL(MLPPolicy):
         # print('observations', observations.shape)
         # print('actions', actions.shape)
 
-        # pred_actions = dist.rsample()
-        # loss = self._loss(pred_actions, actions)
-        loss = -dist.log_prob(actions).mean() #(pred_actions - actions/).pow(2).mean()
+        pred_actions = dist.rsample()
+        loss = self._loss(pred_actions, actions)
+        # loss = -dist.log_prob(actions).mean() #(pred_actions - actions/).pow(2).mean()
 
         self._optimizer.zero_grad()
         loss.backward()

@@ -28,8 +28,8 @@ def build_mlp(
     size: dimension of each hidden layer
     activation: activation of each hidden layer
     input_size: size of the input layer
-    output_size: size of the output layer
-    output_activation: activation of the output layer
+    output_size: size of the outputs layer
+    output_activation: activation of the outputs layer
 
     returns:
         MLP (nn.Module)

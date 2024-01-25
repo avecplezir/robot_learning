@@ -77,7 +77,7 @@ TableFormat = namedtuple("TableFormat", ["lineabove", "linebelowheader",
 
 def _pipe_segment_with_colons(align, colwidth):
     """Return a segment of a horizontal line with optional colons which
-    indicate column's alignment (as in `pipe` output format)."""
+    indicate column's alignment (as in `pipe` outputs format)."""
     w = colwidth
     if align in ["right", "decimal"]:
         return ('-' * (w - 1)) + ":"
@@ -91,7 +91,7 @@ def _pipe_segment_with_colons(align, colwidth):
 
 def _pipe_line_with_colons(colwidths, colaligns):
     """Return a horizontal line with optional colons to indicate column's
-    alignment (as in `pipe` output format)."""
+    alignment (as in `pipe` outputs format)."""
     segments = [_pipe_segment_with_colons(a, w) for a, w in zip(colaligns, colwidths)]
     return "|" + "|".join(segments) + "|"
 
