@@ -34,13 +34,40 @@ If having issues with Pytorch and GPU, make sure to install the compatible versi
 
 ## Examples:
 
+Please use following commands to produce figure in the report:
+
+Base BC Ant agents:
 
 ```
-python run_hw1_bc.py alg.n_iter=1 alg.do_dagger=false
+python run_hw1_bc.py logging.random_seed=1
+python run_hw1_bc.py logging.random_seed=2
+python run_hw1_bc.py logging.random_seed=3
 ```
 
+Base BC Humanoid agents:
 ```
-python run_hw6_sim2real.py alg.n_iter=1
+python run_hw1_bc.py logging.random_seed=1 env.env_name='Humanoid-v2 env.expert_policy_file=../../../hw1/roble/policies/experts/Humanoid.pkl' env.expert_data='../../../hw1/roble/expert_data/expert_data_Humanoid-v2.pkl'
+```
+
+Varying batch size for BC Ant agents:
+```
+python run_hw1_bc.py logging.random_seed=2 alg.batch_size=200
+python run_hw1_bc.py logging.random_seed=2 alg.batch_size=500
+python run_hw1_bc.py logging.random_seed=2 alg.batch_size=1000
+python run_hw1_bc.py logging.random_seed=2 alg.batch_size=2000
+```
+IDM for Ant agents:
+
+```
+python run_hw1_bc.py alg.n_iter=1 alg.do_dagger=false alg.train_idm=true logging.random_seed=2
+```
+
+BC and IDM for HalfCheetah agents:
+
+```
+python run_hw1_bc.py logging.random_seed=1
+python run_hw1_bc.py alg.n_iter=1 alg.do_dagger=false alg.train_idm=true logging.random_seed=1
+
 ```
 
 
