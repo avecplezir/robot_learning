@@ -147,9 +147,14 @@ class MLPPolicySL(MLPPolicy):
         # print('observations', observations.shape)
         # print('actions', actions.shape)
 
-        pred_actions = dist.rsample()
-        loss = self._loss(pred_actions, actions)
-        # loss = -dist.log_prob(actions).mean() #(pred_actions - actions/).pow(2).mean()
+        if self._loss_name == 'logprobe':
+            loss = -dist.log_prob(actions).mean()  # (pred_actions - actions/).pow(2).mean()
+        elif self._loss_name == 'mse':
+            pred_actions = dist.rsample()
+            loss = self._loss(pred_actions, actions)
+        else:
+            assert False, 'invalid loss name'
+
 
         self._optimizer.zero_grad()
         loss.backward()
